@@ -1,0 +1,31 @@
+services:
+
+  redis:
+    image: redis:latest
+    volumes:
+      - redis_data:/data
+    networks:
+      - dev
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      retries: 5
+    restart: always
+
+  redis-insight:
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+    networks:
+      - dev
+    depends_on:
+      - redis
+
+
+volumes:
+  redis_data:
+
+networks:
+  dev:
