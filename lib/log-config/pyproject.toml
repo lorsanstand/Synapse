@@ -1,0 +1,10 @@
+[tool.poetry]
+name = "my-shared-logger"
+version = "0.1.0"
+description = "Общий конфиг логов для микросервисов"
+authors = ["lorsan"]
+packages = [{include = "my_shared_logger"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+colorlog = ">=6.10.1,<7.0.0"
