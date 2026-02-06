@@ -1,0 +1,7 @@
+pyproject.toml
+log_config/__init__.py
+log_config/log_config.py
+log_config.egg-info/PKG-INFO
+log_config.egg-info/SOURCES.txt
+log_config.egg-info/dependency_links.txt
+log_config.egg-info/top_level.txt

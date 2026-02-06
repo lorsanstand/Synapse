@@ -8,14 +8,14 @@ import asyncio
 from typing import Dict, Optional
 
 from fastapi import FastAPI, Request, Response
+from log_config import set_logging
 
 from app.services.schedule import ScheduleService
-from app.core.log_config import set_logging
 from app.core.config import settings
 from app.core.redis import init_redis, close_redis
 from app.schemas.schedule import Day
 
-set_logging()
+set_logging(settings.LOG_LEVEL)
 log = logging.getLogger(__name__)
 
 @asynccontextmanager
