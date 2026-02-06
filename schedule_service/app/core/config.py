@@ -23,6 +23,15 @@ class Settings(BaseSettings):
     def REDIS_URL(self):
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
 
+    RMQ_HOST: str
+    RMQ_USER: str
+    RMQ_PASS: str
+    RMQ_PORT: int
+
+    @property
+    def RABBITMQ_URL(self) -> str:
+        return f"amqp://{self.RMQ_USER}:{self.RMQ_PASS}@{self.RMQ_HOST}:{self.RMQ_PORT}//"
+
     model_config = SettingsConfigDict(env_file=".env", extra="allow")
 
 settings: Settings = Settings()

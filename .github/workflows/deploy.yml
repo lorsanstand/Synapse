@@ -23,7 +23,6 @@ jobs:
 
       - name: Build and Deploy
         run: | 
-          ls -a
           echo "Building and starting containers..."
           # Объединяем в одну команду для надежности
           docker compose up -d --build

@@ -12,4 +12,5 @@ class Change(BaseModel):
 class Changes(BaseModel):
     count: int
     day: str
+    day_week: str
     changes: List[Change]
