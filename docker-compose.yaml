@@ -1,0 +1,75 @@
+services:
+  database:
+    image: postgres:latest
+    env_file:
+      - other.env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    networks:
+      - synapse
+    volumes:
+      - db-data:/var/lib/postgresql
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      retries: 5
+    networks:
+      - synapse
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  prestart_tg_bot:
+    build:
+      context: .
+      dockerfile: tg_bot_service/Dockerfile
+    command: bash scripts/prestart.sh
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - synapse
+    env_file:
+      - .tg.bot.env
+
+  tg_bot_service:
+    build:
+      context: .
+      dockerfile: tg_bot_service/Dockerfile
+    depends_on:
+      database:
+        condition: service_healthy
+      prestart_tg_bot:
+        condition: service_completed_successfully
+    networks:
+      - synapse
+    env_file:
+      - .tg.bot.env
+    restart: unless-stopped
+
+  schedule_service:
+    build:
+      context: .
+      dockerfile: schedule_service/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - synapse
+    env_file:
+      - .schedule.env
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+  db-data:
+
+networks:
+  synapse:

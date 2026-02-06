@@ -108,5 +108,5 @@ class ScheduleService:
                 log.warning("Stopping schedule task")
                 break
             except Exception as e:
-                log.error("Error in cycle %s", e)
+                log.exception("Error in cycle")
                 await asyncio.sleep(5)

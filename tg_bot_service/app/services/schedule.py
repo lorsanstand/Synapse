@@ -13,6 +13,7 @@ from app.core.config import settings
 from app.models.user import UserModel
 from app.dao.user import UserDAO
 from app.core.database import async_session_maker
+# from app.main import bot
 
 log = logging.getLogger(__name__)
 
@@ -162,3 +163,12 @@ class ScheduleService:
 
         log.info("Update group from user %s", message.from_user.id)
         await message.answer("Группа успешно добавлена")
+
+
+    # @classmethod
+    # async def send_message(cls, message: dict, group: int):
+    #     async with async_session_maker() as session:
+    #         users = await UserDAO.find_all(session, None, None, UserModel.group==group)
+    #
+    #     for user in users:
+    #         bot.send_message(user.tg_id, message)

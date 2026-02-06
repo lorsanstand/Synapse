@@ -1,2 +1,5 @@
 .env
 __pycache__
+.other.env
+.schedule.env
+.tg.bot.env

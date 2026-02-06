@@ -839,6 +839,23 @@ files = [
 ]
 
 [[package]]
+name = "my-shared-logger"
+version = "0.1.0"
+description = "Общий конфиг логов для микросервисов"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = []
+develop = false
+
+[package.dependencies]
+colorlog = ">=6.10.1,<7.0.0"
+
+[package.source]
+type = "directory"
+url = "../lib/log-config"
+
+[[package]]
 name = "pydantic"
 version = "2.12.5"
 description = "Data validation using Python type hints"
@@ -1842,4 +1859,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14"
-content-hash = "ef2e71e27e075aada54a165b79a357ca7861111d77113e621f947fed0b55a6a1"
+content-hash = "bfab8ca8d6ce0b781a2f83caecef9e21208b274875bd0624654fea2e159b152c"
