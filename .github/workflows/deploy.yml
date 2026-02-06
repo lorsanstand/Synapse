@@ -16,16 +16,14 @@ jobs:
       - name: Create .env files
         shell: bash
         run: |
-          # Создаем файлы именно в той папке, где лежит docker-compose.yml
-          # Подставь правильный путь до папки с compose файлом
-          DEST="Synapse/Synapse" 
-          
-          echo "${{ secrets.SCHEDULE }}" > "$DEST/.schedule.env"
-          echo "${{ secrets.OTHER }}" > "$DEST/other.env"
-          echo "${{ secrets.TGBOT }}" > "$DEST/.tg.bot.env"
+          # Используем переменные окружения вместо прямой вставки секретов
+          echo "${{ secrets.SCHEDULE }}" > .schedule.env
+          echo "${{ secrets.OTHER }}" > .other.env
+          echo "${{ secrets.TGBOT }}" > .tg.bot.env
 
       - name: Build and Deploy
         run: | 
+          ls -a
           echo "Building and starting containers..."
           # Объединяем в одну команду для надежности
           docker compose up -d --build
@@ -35,4 +33,4 @@ jobs:
         run: |
           echo "Cleaning up..."
           rm -f .*.env
-          docker image prune -f
+          docker system prune -f --volumes
