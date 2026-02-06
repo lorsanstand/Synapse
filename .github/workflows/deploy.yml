@@ -15,15 +15,11 @@ jobs:
 
       - name: Create .env files
         shell: bash
-        env:
-          SCHEDULE_SECRET: ${{ secrets.SCHEDULE }}
-          OTHER_SECRET: ${{ secrets.OTHER }}
-          TGBOT_SECRET: ${{ secrets.TGBOT }}
         run: |
           # Используем переменные окружения вместо прямой вставки секретов
-          echo "$SCHEDULE_SECRET" > .schedule.env
-          echo "$OTHER_SECRET" > .other.env
-          echo "$TGBOT_SECRET" > .tg.bot.env
+          echo "${{ secrets.SCHEDULE }}" > .schedule.env
+          echo "${{ secrets.OTHER }}" > .other.env
+          echo "${{ secrets.TGBOT }}" > .tg.bot.env
 
       - name: Build and Deploy
         run: | 
@@ -36,4 +32,4 @@ jobs:
         run: |
           echo "Cleaning up..."
           rm -f .*.env
-          docker system prune -f --volumes
+          docker image prune -f
