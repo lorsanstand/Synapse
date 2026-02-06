@@ -16,10 +16,13 @@ jobs:
       - name: Create .env files
         shell: bash
         run: |
-          # Используем переменные окружения вместо прямой вставки секретов
-          echo "${{ secrets.SCHEDULE }}" > .schedule.env
-          echo "${{ secrets.OTHER }}" > .other.env
-          echo "${{ secrets.TGBOT }}" > .tg.bot.env
+          # Создаем файлы именно в той папке, где лежит docker-compose.yml
+          # Подставь правильный путь до папки с compose файлом
+          DEST="Synapse/Synapse" 
+          
+          echo "${{ secrets.SCHEDULE }}" > "$DEST/.schedule.env"
+          echo "${{ secrets.OTHER }}" > "$DEST/other.env"
+          echo "${{ secrets.TGBOT }}" > "$DEST/.tg.bot.env"
 
       - name: Build and Deploy
         run: | 
