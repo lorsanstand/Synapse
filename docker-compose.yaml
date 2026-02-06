@@ -2,7 +2,7 @@ services:
   database:
     image: postgres:latest
     env_file:
-      - other.env
+      - .other.env
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
       interval: 5s
