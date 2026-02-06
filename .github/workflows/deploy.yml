@@ -1,0 +1,39 @@
+name: Deploy to server
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env files
+        shell: bash
+        env:
+          SCHEDULE_SECRET: ${{ secrets.SCHEDULE }}
+          OTHER_SECRET: ${{ secrets.OTHER }}
+          TGBOT_SECRET: ${{ secrets.TGBOT }}
+        run: |
+          # Используем переменные окружения вместо прямой вставки секретов
+          echo "$SCHEDULE_SECRET" > .schedule.env
+          echo "$OTHER_SECRET" > .other.env
+          echo "$TGBOT_SECRET" > .tg.bot.env
+
+      - name: Build and Deploy
+        run: | 
+          echo "Building and starting containers..."
+          # Объединяем в одну команду для надежности
+          docker compose up -d --build
+
+      - name: Cleanup
+        if: always() # Запускать даже если деплой упал
+        run: |
+          echo "Cleaning up..."
+          rm -f .*.env
+          docker system prune -f --volumes
