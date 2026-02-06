@@ -26,6 +26,16 @@ services:
       - redis-data:/data
     restart: unless-stopped
 
+  rabbitmq:
+    image: rabbitmq:3.8
+    networks:
+      - synapse
+    env_file:
+      - .other.env
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    restart: unless-stopped
+
   prestart_tg_bot:
     build:
       context: .
@@ -38,6 +48,24 @@ services:
       - synapse
     env_file:
       - .tg.bot.env
+
+  tg_bot_tasker:
+    build:
+      context: .
+      dockerfile: tg_bot_service/Dockerfile
+    command: taskiq  worker app.core.taskiq_app:broker
+    depends_on:
+      database:
+        condition: service_healthy
+      prestart_tg_bot:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_started
+    networks:
+      - synapse
+    env_file:
+      - .tg.bot.env
+    restart: unless-stopped
 
   tg_bot_service:
     build:
@@ -61,6 +89,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      tg_bot_tasker:
+        condition: service_started
     networks:
       - synapse
     env_file:
@@ -70,6 +100,7 @@ services:
 volumes:
   redis-data:
   db-data:
+  rabbitmq-data:
 
 networks:
   synapse:

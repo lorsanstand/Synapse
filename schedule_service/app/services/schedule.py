@@ -10,6 +10,7 @@ from app.core.redis import get_redis
 from app.core.config import settings
 from app.utils.find_changes import FindChanges
 from app.schemas.find_changes import Changes
+from app.tasks.bot import BotTasks
 
 log = logging.getLogger(__name__)
 
@@ -88,8 +89,10 @@ class ScheduleService:
                 all_changes = Changes(
                     count=len(ch),
                     day=key,
+                    day_week=value["day_week"],
                     changes=ch
                 )
+                await BotTasks.send_message.kiq(data=all_changes, group=group)
                 log.info("Find successfully changed: %s", all_changes)
 
 
@@ -103,7 +106,7 @@ class ScheduleService:
         while True:
             try:
                 await cls.update_schedule(settings.GROUP)
-                await asyncio.sleep(300)
+                await asyncio.sleep(60)
             except asyncio.CancelledError as ex:
                 log.warning("Stopping schedule task")
                 break

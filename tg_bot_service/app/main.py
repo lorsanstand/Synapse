@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.handlers.base import router as base_router, set_commands
 from app.handlers.schedule import router as schedule_router
 from app.services.user import UserService
+from app.core.taskiq_app import broker
 
 set_logging(settings.LOG_LEVEL)
 log = logging.getLogger(__name__)
@@ -43,6 +44,7 @@ async def main():
     await set_commands(bot)
     dp.message.outer_middleware.register(UserUpdateMiddleware())
     await dp.start_polling(bot)
+    await broker.startup()
 
 
 if __name__ == "__main__":

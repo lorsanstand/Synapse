@@ -14,6 +14,7 @@ from app.services.schedule import ScheduleService
 from app.core.config import settings
 from app.core.redis import init_redis, close_redis
 from app.schemas.schedule import Day
+from app.core.taskiq_app import broker
 
 set_logging(settings.LOG_LEVEL)
 log = logging.getLogger(__name__)
@@ -22,10 +23,16 @@ log = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     await init_redis()
     log.info("Redis connected")
+
+    await broker.startup()
+
     task = asyncio.create_task(ScheduleService.schedule_task_loop())
     yield
     await close_redis()
     log.info("Redis disconnected")
+
+    await broker.shutdown()
+
     task.cancel()
 
 app = FastAPI(
