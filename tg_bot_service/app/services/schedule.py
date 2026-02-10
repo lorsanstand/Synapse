@@ -119,7 +119,7 @@ class ScheduleService:
         if not data:
             return "🏖 Занятий нет, отдыхай!"
 
-        text = f"🗓 <b>{data['day_week']}</b>\n"
+        text = f"🗓 <b>{data['day_week']} {data["day"]}</b>\n"
         text += "─" * 15 + "\n"
 
         sorted_pairs = sorted(data['pairs'].items(), key=lambda x: int(x[0]))
