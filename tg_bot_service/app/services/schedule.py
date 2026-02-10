@@ -49,7 +49,7 @@ class ScheduleService:
                 await message.message.answer("Что то сломалось")
             return
 
-        text = cls.format_schedule(data[day.strftime("%d.%m.%Y")])
+        text = cls.format_schedule(data[day.strftime("%d.%m.%Y")], day.strftime("%d.%m.%Y"))
 
         if isinstance(message, Message):
             await message.answer(text, parse_mode=ParseMode.HTML, reply_markup=keyboard)
@@ -115,11 +115,11 @@ class ScheduleService:
 
 
     @classmethod
-    def format_schedule(cls, data):
+    def format_schedule(cls, data: dict, date_: str):
         if not data:
             return "🏖 Занятий нет, отдыхай!"
 
-        text = f"🗓 <b>{data['day_week']} {data["day"]}</b>\n"
+        text = f"🗓 <b>{data['day_week']} {date}</b>\n"
         text += "─" * 15 + "\n"
 
         sorted_pairs = sorted(data['pairs'].items(), key=lambda x: int(x[0]))
