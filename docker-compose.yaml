@@ -8,6 +8,8 @@ services:
       interval: 5s
       timeout: 10s
       retries: 5
+    ports:
+      - "5400:5432"
     networks:
       - synapse
     volumes:
