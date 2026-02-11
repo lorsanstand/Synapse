@@ -34,9 +34,9 @@ class Schedule:
         for tr in table.find_all("tr"):
             if tr.find("td", class_="colspan"):
                 data = tr.find("span", class_="h3").get_text(strip=True)
-                data = data.split(" ")
-                date_schedule = data[0]
-                day = data[1]
+                date_ = data.split(" ")
+                date_schedule = date_[0]
+                day = date_[1]
                 parse_schedule[date_schedule] = {"day_week": day, "pairs": {}}
                 continue
 

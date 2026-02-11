@@ -117,9 +117,14 @@ class ScheduleService:
     @classmethod
     def format_schedule(cls, data: dict, date_: str):
         if not data:
-            return "🏖 Занятий нет, отдыхай!"
+            return f"{date_}: 🏖 Занятий нет, отдыхай!"
 
-        text = f"🗓 <b>{data['day_week']} {date_}</b>\n"
+        if date_ == date.today().strftime("%d.%m.%Y"):
+            today = "Сегодня"
+        else:
+            today = ""
+
+        text = f"🗓 <b>{data['day_week']} {date_} {today}</b>\n"
         text += "─" * 15 + "\n"
 
         sorted_pairs = sorted(data['pairs'].items(), key=lambda x: int(x[0]))
