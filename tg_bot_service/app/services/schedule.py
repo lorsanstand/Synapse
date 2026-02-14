@@ -120,7 +120,7 @@ class ScheduleService:
             return f"{date_}: 🏖 Занятий нет, отдыхай!"
 
         if date_ == date.today().strftime("%d.%m.%Y"):
-            today = "Сегодня"
+            today = "(Сегодня)"
         else:
             today = ""
 

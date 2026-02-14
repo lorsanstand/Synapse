@@ -10,6 +10,7 @@ from log_config import set_logging
 from app.core.config import settings
 from app.handlers.base import router as base_router, set_commands
 from app.handlers.schedule import router as schedule_router
+from app.handlers.admin import router as admin_router
 from app.services.user import UserService
 from app.core.taskiq_app import broker
 
@@ -20,6 +21,7 @@ bot = Bot(token=settings.BOT_TOKEN)
 dp = Dispatcher()
 dp.include_router(base_router)
 dp.include_router(schedule_router)
+dp.include_router(admin_router)
 
 last_updates = {}
 
