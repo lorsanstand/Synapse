@@ -53,7 +53,7 @@ class LinkService:
     async def verify_user(cls, message: Message, key: str, user: UserModel):
         redis_client = await get_redis()
 
-        key_exist = await redis_client.getdel(f"get_access:{key}")
+        key_exist = await redis_client.get(f"get_access:{key}")
 
         if key_exist is None:
             return
