@@ -49,5 +49,10 @@ async def command_start(message: Message, command: CommandObject, user: UserMode
 
 @router.message(Command("help"))
 async def command_help(message: Message):
-    await message.answer("help")
+    await message.answer("""Я помогу тебе всегда держать расписание под рукой. Вот как со мной работать:
+🛠 Основные команды
+
+    /group [название] — Установить твою учебную группу. Бот запомнит её, и тебе не придется вводить её каждый раз.
+
+    /schedule — Показать расписание на сегодня для выбранной группы.""")
     log.info("send /helo user: %s", message.from_user.id)
