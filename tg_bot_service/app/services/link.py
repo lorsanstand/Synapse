@@ -46,7 +46,7 @@ class LinkService:
 
         await redis_client.setex(f"{type}:{key}", time, 1)
 
-        await message.message.edit_text(f"Приглашение в бота: https://t.me/{settings.BOT_USERNAME}?start={key}")
+        await message.message.edit_text(f"Приглашение: https://t.me/{settings.BOT_USERNAME}?start={key}")
 
 
     @classmethod
