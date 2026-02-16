@@ -64,7 +64,8 @@ def format_change_notification(data):
             "teacher": "Преподаватель",
             "audience": "Аудитория",
             "time": "Время",
-            "type": "Тип занятия"
+            "type": "Тип занятия",
+            "subgroup": "Подгруппа"
         }
         display_field = field_map.get(field_name, field_name)
 

@@ -1,11 +1,13 @@
-from typing import Dict, Any
+from typing import Dict, Any, List, Optional
 import asyncio
 import logging
 from datetime import datetime, timedelta
+import uvicorn
 
 from aiogram import Bot, Dispatcher, BaseMiddleware
 from aiogram.types import Message
 from log_config import set_logging
+from fastapi import FastAPI
 
 from app.core.config import settings
 from app.handlers.base import router as base_router, set_commands
@@ -23,6 +25,8 @@ dp = Dispatcher()
 dp.include_router(base_router)
 dp.include_router(schedule_router)
 dp.include_router(admin_router)
+
+app = FastAPI()
 
 last_updates = {}
 
@@ -43,6 +47,11 @@ class UserUpdateMiddleware(BaseMiddleware):
         return await handler(event, data)
 
 
+@app.get("/groups")
+async def get_groups() -> List[Optional[int]]:
+    return await UserService.get_all_groups()
+
+
 async def main():
     settings.BOT_USERNAME = (await bot.get_me()).username
 
@@ -52,8 +61,14 @@ async def main():
     log.info("Redis started")
     await set_commands(bot)
     dp.message.outer_middleware.register(UserUpdateMiddleware())
-    await dp.start_polling(bot)
-    log.info("Bot started")
+
+    config = uvicorn.Config(app, host="0.0.0.0", port=8080)
+    server = uvicorn.Server(config)
+
+    await asyncio.gather(
+        dp.start_polling(bot),
+        server.serve()
+    )
 
 
 if __name__ == "__main__":

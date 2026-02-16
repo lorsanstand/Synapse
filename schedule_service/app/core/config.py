@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     PORT: int
     WORKERS: int
 
+    TG_BACKEND_BOT_URL: str
+
     SCRAP_URL: str
     GROUP: int = 90002595
 

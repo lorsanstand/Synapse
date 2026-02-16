@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.utils.find_changes import FindChanges
 from app.schemas.find_changes import Changes
 from app.tasks.bot import BotTasks
+from app.utils.group import load_groups
 
 log = logging.getLogger(__name__)
 
@@ -105,7 +106,9 @@ class ScheduleService:
     async def schedule_task_loop(cls):
         while True:
             try:
-                await cls.update_schedule(settings.GROUP)
+                groups = await load_groups()
+                for group in groups:
+                    await cls.update_schedule(group)
                 await asyncio.sleep(60)
             except asyncio.CancelledError as ex:
                 log.warning("Stopping schedule task")

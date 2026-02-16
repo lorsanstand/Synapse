@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 import logging
 
 from aiogram.types import Message
@@ -71,3 +71,11 @@ class UserService:
                 log.info("Update user %s in DB", message.from_user.id)
 
             await session.commit()
+
+
+    @classmethod
+    async def get_all_groups(cls) -> List[int]:
+        async with async_session_maker() as session:
+            groups = await UserDAO.select_all_group(session)
+
+            return groups
