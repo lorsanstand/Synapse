@@ -1,18 +1,16 @@
 from datetime import date, timedelta
-import json
-import time
 import logging
 from typing import Optional, Union
 
-import httpx
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from aiogram.filters.callback_data import CallbackData
 from aiogram.enums import ParseMode
 
-from app.core.config import settings
 from app.models.user import UserModel
 from app.dao.user import UserDAO
 from app.core.database import async_session_maker
+from app.utils.schedule import load_schedule
+from app.utils.formatter import ScheduleFormatterMessage
 
 log = logging.getLogger(__name__)
 
@@ -38,9 +36,9 @@ class ScheduleService:
                 await message.message.answer("Пожалуйста укажите номер группы через /group")
             return
 
-        keyboard = cls.get_keyboard(day)
+        keyboard = cls._get_schedule_keyboard(day)
 
-        data = await cls._get_schedule(int(user.group), begin=day, end=day)
+        data = await load_schedule(int(user.group), begin=day, end=day)
 
         if data is None:
             if isinstance(message, Message):
@@ -49,7 +47,7 @@ class ScheduleService:
                 await message.message.answer("Что то сломалось")
             return
 
-        text = cls.format_schedule(data[day.strftime("%d.%m.%Y")], day.strftime("%d.%m.%Y"))
+        text = ScheduleFormatterMessage.format_schedule(data[day.strftime("%d.%m.%Y")], day.strftime("%d.%m.%Y"))
 
         if isinstance(message, Message):
             await message.answer(text, parse_mode=ParseMode.HTML, reply_markup=keyboard)
@@ -61,7 +59,7 @@ class ScheduleService:
 
 
     @classmethod
-    def get_keyboard(cls, current_date: date):
+    def _get_schedule_keyboard(cls, current_date: date):
         prev_date = current_date - timedelta(days=1)
         next_date = current_date + timedelta(days=1)
 
@@ -86,64 +84,6 @@ class ScheduleService:
             ]
         )
         return keyboard
-
-
-    @classmethod
-    async def _get_schedule(cls, group: int, begin: date, end: date) -> Optional[dict]:
-        start_time = time.perf_counter()
-        async with httpx.AsyncClient() as client:
-            data = dict(
-                group=group,
-                begin=begin,
-                end=end
-            )
-
-            try:
-                response = await client.get(settings.SCHEDULE_URL, params=data)
-            except httpx.ConnectError as e:
-                log.error("Schedule getting error %s", e)
-                return None
-
-            if response.status_code != 200:
-                log.error("Schedule getting error status code: %s", response.status_code)
-                return None
-
-        process_time = time.perf_counter() - start_time
-        log.debug("Schedule completed successfully time: %.3fs", process_time)
-
-        return json.loads(response.content)
-
-
-    @classmethod
-    def format_schedule(cls, data: dict, date_: str):
-        if not data:
-            return f"{date_}: 🏖 Занятий нет, отдыхай!"
-
-        if date_ == date.today().strftime("%d.%m.%Y"):
-            today = "(Сегодня)"
-        else:
-            today = ""
-
-        text = f"🗓 <b>{data['day_week']} {date_} {today}</b>\n"
-        text += "─" * 15 + "\n"
-
-        sorted_pairs = sorted(data['pairs'].items(), key=lambda x: int(x[0]))
-
-        for num, lessons in sorted_pairs:
-            for lesson in lessons:
-
-                sub = f" [Гр.{lesson['subgroup']}]" if lesson['subgroup'] else ""
-                text += f"<b>{num}️⃣ {lesson['time']}</b>\n"
-                text += f"🎓 <b>{lesson['lesson_name']}</b> ({lesson['type']}){sub}\n"
-                text += f"👤 {lesson['teacher']}\n"
-
-                audience = lesson['audience'].replace("Учебный корпус", "корп.")
-                if "он-лайн" in audience.lower():
-                    audience = "🌐 Онлайн"
-
-                text += f"📍 <i>{audience}</i>\n\n"
-
-        return text
 
 
     @classmethod

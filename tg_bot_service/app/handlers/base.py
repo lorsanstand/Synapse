@@ -2,7 +2,10 @@ import logging
 
 from aiogram import Router, Bot
 from aiogram.types import Message, BotCommand, BotCommandScopeDefault
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import CommandStart, Command, CommandObject
+
+from app.models.user import UserModel
+from app.services.link import LinkService
 
 log = logging.getLogger(__name__)
 router = Router()
@@ -30,13 +33,18 @@ async def set_commands(bot: Bot):
     await bot.set_my_commands(commands, scope=BotCommandScopeDefault())
 
 @router.message(CommandStart())
-async def command_start(message: Message):
+async def command_start(message: Message, command: CommandObject, user: UserModel):
+    args = command.args
+
     await message.answer("""Хей! Приветствую! 🤖✨
 
 Рад знакомству! Я — твой персональный ассистент. Со мной ты забудешь о рутине и сможешь .
 
 Жми /help, если потеряешься, или просто выбирай нужный раздел в меню! 🚀""")
     log.info("send /start user: %s", message.from_user.id)
+
+    if args:
+        await LinkService.verify_user(message, args, user)
 
 
 @router.message(Command("help"))

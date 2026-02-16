@@ -13,6 +13,7 @@ from app.handlers.schedule import router as schedule_router
 from app.handlers.admin import router as admin_router
 from app.services.user import UserService
 from app.core.taskiq_app import broker
+from app.core.redis import init_redis
 
 set_logging(settings.LOG_LEVEL)
 log = logging.getLogger(__name__)
@@ -43,15 +44,17 @@ class UserUpdateMiddleware(BaseMiddleware):
 
 
 async def main():
+    settings.BOT_USERNAME = (await bot.get_me()).username
+
+    await broker.startup()
+    log.info("Taskiq started")
+    await init_redis()
+    log.info("Redis started")
     await set_commands(bot)
     dp.message.outer_middleware.register(UserUpdateMiddleware())
     await dp.start_polling(bot)
-    await broker.startup()
+    log.info("Bot started")
 
 
 if __name__ == "__main__":
-    try:
-        log.info("Starting bot")
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        log.warning("Stoping bot")
+    asyncio.run(main())
