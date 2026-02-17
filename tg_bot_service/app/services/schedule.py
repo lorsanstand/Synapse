@@ -5,6 +5,7 @@ from typing import Optional, Union
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from aiogram.filters.callback_data import CallbackData
 from aiogram.enums import ParseMode
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from app.models.user import UserModel
 from app.dao.user import UserDAO
@@ -60,30 +61,52 @@ class ScheduleService:
 
     @classmethod
     def _get_schedule_keyboard(cls, current_date: date):
-        prev_date = current_date - timedelta(days=1)
-        next_date = current_date + timedelta(days=1)
+        builder = InlineKeyboardBuilder()
 
-        keyboard = InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    InlineKeyboardButton(
-                        text="⬅️ Пред. день",
-                        callback_data=ScheduleAction(action="show", date_str=prev_date.isoformat()).pack()
-                    ),
-                    InlineKeyboardButton(
-                        text="След. день ➡️",
-                        callback_data=ScheduleAction(action="show", date_str=next_date.isoformat()).pack()
-                    )
-                ],
-                [
-                    InlineKeyboardButton(
-                        text="📅 Сегодня",
-                        callback_data=ScheduleAction(action="show", date_str=date.today().isoformat()).pack()
-                    )
-                ]
-            ]
+        prev_week = current_date - timedelta(days=7)
+        next_week = current_date + timedelta(days=7)
+
+        monday = current_date - timedelta(days=current_date.weekday())
+        sunday = monday + timedelta(days=6)
+
+        week = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб"]
+
+        for index, week_day in enumerate(week):
+            day = monday + timedelta(days=index)
+
+            if day == current_date:
+                week_day = "🔸" + week_day
+
+            builder.add(InlineKeyboardButton(
+                        text=week_day,
+                        callback_data=ScheduleAction(action="show", date_str=day.isoformat()).pack()
+                    ))
+
+        builder.adjust(7)
+
+        text = f"{monday.strftime('%d.%m.%Y')} - {sunday.strftime('%d.%m.%Y')}"
+
+        builder.row(InlineKeyboardButton(text=text, callback_data="ignore"))
+
+        builder.row(
+            InlineKeyboardButton(
+                text="Пред. Неделя",
+                callback_data=ScheduleAction(action="show", date_str=prev_week.isoformat()).pack()
+            ),
+            InlineKeyboardButton(
+                text="След. Неделя",
+                callback_data=ScheduleAction(action="show", date_str=next_week.isoformat()).pack()
+            ),
         )
-        return keyboard
+
+        builder.row(
+            InlineKeyboardButton(
+                text="📅 Сегодня",
+                callback_data=ScheduleAction(action="show", date_str=date.today().isoformat()).pack()
+            )
+        )
+
+        return builder.as_markup()
 
 
     @classmethod

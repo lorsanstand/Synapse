@@ -1,8 +1,9 @@
 import logging
 
 from aiogram import Router, Bot
-from aiogram.types import Message, BotCommand, BotCommandScopeDefault
+from aiogram.types import Message, BotCommand, BotCommandScopeDefault, CallbackQuery
 from aiogram.filters import CommandStart, Command, CommandObject
+from aiogram import F
 
 from app.models.user import UserModel
 from app.services.link import LinkService
@@ -56,3 +57,8 @@ async def command_help(message: Message):
 
     /schedule — Показать расписание на сегодня для выбранной группы.""")
     log.info("send /helo user: %s", message.from_user.id)
+
+
+@router.callback_query(F.data == "ignore")
+async def ignore_callback(callback: CallbackQuery):
+    await callback.answer()
