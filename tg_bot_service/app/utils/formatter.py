@@ -32,3 +32,31 @@ class ScheduleFormatterMessage:
                 text += f"📍 <i>{audience}</i>\n\n"
 
         return text
+
+
+    @staticmethod
+    def format_change_notification(data):
+        text = f"⚠️ <b>Внимание! Изменение в расписании</b>\n"
+        text += f"📅 <b>{data['day']} ({data['day_week']})</b>\n"
+        text += "─" * 15 + "\n"
+
+        for i, change in enumerate(data["changes"], 1):
+            field_name = change["field"]
+            old_val = change["old"] if change["old"] else "—"
+            new_val = change["new"] if change["new"] else "❌ Отменено"
+
+            field_map = {
+                "lesson_name": "Предмет",
+                "teacher": "Преподаватель",
+                "audience": "Аудитория",
+                "time": "Время",
+                "type": "Тип занятия",
+                "subgroup": "Подгруппа"
+            }
+            display_field = field_map.get(field_name, field_name)
+
+            text += f"{i}. <b>{display_field}:</b>\n"
+            text += f"   <s>{old_val}</s> ➔ <b>{new_val}</b>\n\n"
+
+        text += "🔔 Проверьте обновленное расписание в меню!"
+        return text

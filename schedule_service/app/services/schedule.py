@@ -21,12 +21,12 @@ class ScheduleService:
     async def get_schedule(cls, group: int, begin: date, end: date):
         log.debug("Start getting schedule group: %s", group)
         redis = await get_redis()
-        dates = []
+        dates = {}
         schedule: Optional[dict] = {}
 
         current_date = begin
         while current_date <= end:
-            dates.append(current_date.strftime("%d.%m.%Y"))
+            dates[current_date.strftime("%d.%m.%Y")] = current_date
             current_date += timedelta(days=1)
 
         schedule_all = await redis.get(str(group))
@@ -40,8 +40,14 @@ class ScheduleService:
             schedule_all = json.loads(schedule_all)
 
 
-        for day in dates:
-            schedule[day] = schedule_all.get(day)
+        for str_day, day in dates.items():
+            schedule_day = schedule_all.get(str_day)
+
+            if schedule_day is None:
+                schedule_day = await Schedule.pars_schedule(group, day, day)
+                schedule_day = schedule_day.get(str_day)
+
+            schedule[str_day] = schedule_day
 
         log.info("Successfully get schedule group: %s", group)
         return schedule
@@ -52,8 +58,8 @@ class ScheduleService:
         log.debug("Started update schedule group: %s", group)
         redis = await get_redis()
         today = date.today()
-        begin_date = today - timedelta(weeks=1)
-        end_date = today + timedelta(weeks=2)
+        begin_date = today - timedelta(weeks=2)
+        end_date = today + timedelta(weeks=3)
 
         schedule_old = await redis.get(str(group))
         schedule_new = await Schedule.pars_schedule(group, begin_date, end_date)

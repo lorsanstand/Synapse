@@ -10,6 +10,7 @@ from app.core.database import async_session_maker
 from app.dao.user import UserDAO
 from app.models.user import UserModel
 from app.services.schedule import ScheduleAction
+from app.utils.formatter import ScheduleFormatterMessage
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class BotTasks:
 
         date_obj = datetime.strptime(data["day"], "%d.%m.%Y")
 
-        text = format_change_notification(data)
+        text = ScheduleFormatterMessage.format_change_notification(data)
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
                 [
@@ -46,31 +47,3 @@ class BotTasks:
                 continue
 
         log.info("Successfully send messages")
-
-
-
-def format_change_notification(data):
-    text = f"⚠️ <b>Внимание! Изменение в расписании</b>\n"
-    text += f"📅 <b>{data['day']} ({data['day_week']})</b>\n"
-    text += "─" * 15 + "\n"
-
-    for i, change in enumerate(data["changes"], 1):
-        field_name = change["field"]
-        old_val = change["old"] if change["old"] else "—"
-        new_val = change["new"] if change["new"] else "❌ Отменено"
-
-        field_map = {
-            "lesson_name": "Предмет",
-            "teacher": "Преподаватель",
-            "audience": "Аудитория",
-            "time": "Время",
-            "type": "Тип занятия",
-            "subgroup": "Подгруппа"
-        }
-        display_field = field_map.get(field_name, field_name)
-
-        text += f"{i}. <b>{display_field}:</b>\n"
-        text += f"   <s>{old_val}</s> ➔ <b>{new_val}</b>\n\n"
-
-    text += "🔔 Проверьте обновленное расписание в меню!"
-    return text

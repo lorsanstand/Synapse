@@ -6,6 +6,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.models.user import UserModel
+from app.models.last_message import LastMessageModel
 from app.core.database import Base
 from app.core.config import settings
 

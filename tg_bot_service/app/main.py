@@ -3,6 +3,7 @@ import asyncio
 import logging
 from datetime import datetime, timedelta
 import uvicorn
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from aiogram import Bot, Dispatcher, BaseMiddleware
 from aiogram.types import Message
@@ -14,6 +15,7 @@ from app.handlers.base import router as base_router, set_commands
 from app.handlers.schedule import router as schedule_router
 from app.handlers.admin import router as admin_router
 from app.services.user import UserService
+from app.services.schedule import ScheduleService
 from app.core.taskiq_app import broker
 from app.core.redis import init_redis
 
@@ -25,6 +27,9 @@ dp = Dispatcher()
 dp.include_router(base_router)
 dp.include_router(schedule_router)
 dp.include_router(admin_router)
+
+scheduler = AsyncIOScheduler()
+scheduler.add_job(ScheduleService.update_message, "cron", hour=0, minute=1, args=[bot])
 
 app = FastAPI()
 
@@ -55,6 +60,8 @@ async def get_groups() -> List[Optional[int]]:
 async def main():
     settings.BOT_USERNAME = (await bot.get_me()).username
 
+    scheduler.start()
+    log.info("Scheduler started")
     await broker.startup()
     log.info("Taskiq started")
     await init_redis()
