@@ -36,3 +36,11 @@ class UserCreate(UserBase):
 
 class UserUpdate(UserBase):
     pass
+
+class User(UserBase):
+    id: Optional[int]
+    is_admin: Optional[bool]
+    is_verified: Optional[bool]
+
+    class Config:
+        from_attributes = True

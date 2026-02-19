@@ -1,12 +1,14 @@
+import json
 from typing import Optional, List
 import logging
 
 from aiogram.types import Message
 
-from app.schemas.user import UserCreate, UserCreateDB, UserUpdateDB
+from app.schemas.user import UserCreate, UserCreateDB, UserUpdateDB, User
 from app.models.user import UserModel
 from app.dao.user import UserDAO
 from app.core.database import async_session_maker
+from app.core.redis import get_redis
 
 log = logging.getLogger(__name__)
 
@@ -31,8 +33,19 @@ class UserService:
 
     @classmethod
     async def get_user(cls, tg_id: int) -> Optional[UserModel]:
+        redis_client = await get_redis()
+        user = await redis_client.get(f"user:{tg_id}")
+
+        if user:
+            log.debug("User founded in redis")
+            user = json.loads(user)
+            return user
+
         async with async_session_maker() as session:
             user = await UserDAO.find_one_or_none(session, UserModel.tg_id == tg_id)
+            user_schemas = User.model_validate(user)
+            await redis_client.setex(f"user:{tg_id}", 30, user_schemas.model_dump_json())
+            log.info("User founded in db")
 
         return user
 
