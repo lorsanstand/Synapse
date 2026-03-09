@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 class ScheduleService:
     @classmethod
     async def get_schedule(cls, group: int, begin: date, end: date):
-        log.debug("Start getting schedule group: %s", group)
+        log.info("Start getting schedule group: %s", group)
         redis = await get_redis()
         dates = {}
         schedule: Optional[dict] = {}
@@ -32,7 +32,7 @@ class ScheduleService:
         schedule_all = await redis.get(str(group))
 
         if schedule_all is None:
-            log.debug("Schedule not found in redis")
+            log.info("Schedule not found in redis")
             schedule_all = await Schedule.pars_schedule(group, begin, end)
             # await redis.setex(str(group), 61, json.dumps(schedule_all, ensure_ascii=False))
 
@@ -44,8 +44,9 @@ class ScheduleService:
             schedule_day = schedule_all.get(str_day)
 
             if schedule_day is None:
-                schedule_day = await Schedule.pars_schedule(group, day, day)
-                schedule_day = schedule_day.get(str_day)
+                # Вот строчка которая замдедляла все я даун
+                # schedule_day = await Schedule.pars_schedule(group, day, day)
+                schedule_day = None
 
             schedule[str_day] = schedule_day
 
