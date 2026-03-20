@@ -105,7 +105,10 @@ class ScheduleService:
 
         hashes = {key: hashes[key] for key in hashes if key in schedule_new}
         await redis.setex(str(group), 360, json.dumps(schedule_new, ensure_ascii=False))
-        await redis.hset(f"{group}:hash", mapping=hashes)
+        if hashes:
+            await redis.hset(f"{group}:hash", mapping=hashes)
+        else:
+            await redis.delete(f"{group}:hash")
 
 
     @classmethod
