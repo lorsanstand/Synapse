@@ -11,6 +11,7 @@ from aiogram.exceptions import TelegramBadRequest
 
 from app.dao.last_message import LastMessageDAO
 from app.models.last_message import LastMessageModel
+from app.schemas.user import User
 from app.models.user import UserModel
 from app.dao.user import UserDAO
 from app.core.database import async_session_maker
@@ -27,7 +28,7 @@ class ScheduleAction(CallbackData, prefix="sch"):
 
 class ScheduleService:
     @classmethod
-    async def get_schedule(cls, message: Union[Message, CallbackQuery], day: date = None, user: UserModel = None):
+    async def get_schedule(cls, message: Union[Message, CallbackQuery], day: date = None, user: User = None):
         if day is None:
             day = date.today()
 

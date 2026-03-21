@@ -32,14 +32,15 @@ class UserService:
         return user
 
     @classmethod
-    async def get_user(cls, tg_id: int) -> Optional[UserModel]:
+    async def get_user(cls, tg_id: int) -> Optional[User]:
         redis_client = await get_redis()
         user = await redis_client.get(f"user:{tg_id}")
 
         if user:
             log.debug("User founded in redis")
             user = json.loads(user)
-            return user
+            user_schemas = User.model_validate(user)
+            return user_schemas
 
         async with async_session_maker() as session:
             user = await UserDAO.find_one_or_none(session, UserModel.tg_id == tg_id)
