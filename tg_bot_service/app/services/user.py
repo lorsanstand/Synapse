@@ -48,7 +48,7 @@ class UserService:
             await redis_client.setex(f"user:{tg_id}", 30, user_schemas.model_dump_json())
             log.info("User founded in db")
 
-        return user
+        return user_schemas
 
 
     @classmethod

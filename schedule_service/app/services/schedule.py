@@ -59,7 +59,7 @@ class ScheduleService:
         redis = await get_redis()
         today = date.today()
         begin_date = today - timedelta(weeks=2)
-        end_date = today + timedelta(weeks=3)
+        end_date = today + timedelta(weeks=2)
 
         schedule_old = await redis.get(str(group))
         schedule_new = await Schedule.pars_schedule(group, begin_date, end_date)
