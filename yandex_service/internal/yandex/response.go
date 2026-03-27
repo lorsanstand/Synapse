@@ -2,6 +2,8 @@ package yandex
 
 import (
 	"fmt"
+	"log/slog"
+	"strconv"
 	"strings"
 
 	"github.com/lorsanstand/yandex_service/internal/integration/schedule"
@@ -32,18 +34,29 @@ func failedYandexResponse() YandexResponse {
 }
 
 func scheduleYandexResponse(schedule schedule.Day) YandexResponse {
-	var text string
+	var text, lessons, FirstPair string
+	NumPairSmall := 10
 
 	text = fmt.Sprintf("На заданный день у вас %v пары, ", len(schedule.Pairs))
-	for _, pair := range schedule.Pairs {
-		//tim := strings.Split(pair[0].Time, " - ")
-		//text += fmt.Sprintf("Первая пара начинается в %v.", tim[0])
+	for num, pair := range schedule.Pairs {
+		numPair, err := strconv.Atoi(num)
+		if err != nil {
+			slog.Warn("Failed convert string to int")
+		}
 
-		text += fmt.Sprintf("%v, ", strings.Trim(pair[0].LessonName, "_"))
+		if numPair < NumPairSmall {
+			tim := strings.Split(pair[0].Time, " - ")
+			FirstPair = fmt.Sprintf("Первая пара начинается в %v.", tim[0])
+			NumPairSmall = numPair
+		}
+
+		lessons += fmt.Sprintf("%v, ", strings.Trim(pair[0].LessonName, "_"))
 	}
 
+	text = text + FirstPair + lessons
+
 	if schedule.Pairs == nil {
-		text = "Хорошие новости! Сегодня пар нет, можно отдыхать."
+		text = "Хорошие новости! пар нет, можно отдыхать."
 	}
 
 	return YandexResponse{
