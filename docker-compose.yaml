@@ -101,6 +101,18 @@ services:
       - .schedule.env
     restart: unless-stopped
 
+  yandex_service:
+    build:
+      context: .
+      dockerfile: yandex_service/Dockerfile
+    networks:
+      - synapse
+    ports:
+      - "4653:9000"
+    env_file:
+      - .yandex.env
+    restart: unless-stopped
+
 volumes:
   redis-data:
   db-data:

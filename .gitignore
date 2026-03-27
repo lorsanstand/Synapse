@@ -3,3 +3,4 @@ __pycache__
 .other.env
 .schedule.env
 .tg.bot.env
+.yandex.env
