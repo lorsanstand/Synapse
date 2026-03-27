@@ -20,6 +20,7 @@ jobs:
           echo "${{ secrets.SCHEDULE }}" > .schedule.env
           echo "${{ secrets.OTHER }}" > .other.env
           echo "${{ secrets.TGBOT }}" > .tg.bot.env
+          echo "${{ secrets.YANDEX }}" > .yandex.env
 
       - name: Build and Deploy
         run: | 
