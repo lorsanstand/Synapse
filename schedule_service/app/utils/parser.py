@@ -12,6 +12,19 @@ log = logging.getLogger(__name__)
 
 
 class Schedule:
+    @staticmethod
+    def _lesson_sort_key(lesson: dict):
+        subgroup = lesson.get("subgroup")
+        subgroup_order = subgroup if subgroup is not None else 10**9
+        return (
+            subgroup_order,
+            lesson.get("lesson_name") or "",
+            lesson.get("type") or "",
+            lesson.get("teacher") or "",
+            lesson.get("audience") or "",
+            lesson.get("time") or "",
+        )
+
     @classmethod
     async def pars_schedule(cls, group: int, begin: date, end: date):
         log.debug("Start parsing schedule group: %s", group)
@@ -94,6 +107,10 @@ class Schedule:
                     "subgroup": subgroup
                 }
             )
+
+        for day_data in parse_schedule.values():
+            for pair_key, lessons in day_data["pairs"].items():
+                day_data["pairs"][pair_key] = sorted(lessons, key=cls._lesson_sort_key)
 
         return parse_schedule
 

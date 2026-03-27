@@ -17,6 +17,41 @@ log = logging.getLogger(__name__)
 
 
 class ScheduleService:
+    @staticmethod
+    def _lesson_sort_key(lesson: dict):
+        subgroup = lesson.get("subgroup")
+        subgroup_order = subgroup if subgroup is not None else 10**9
+        return (
+            subgroup_order,
+            lesson.get("lesson_name") or "",
+            lesson.get("type") or "",
+            lesson.get("teacher") or "",
+            lesson.get("audience") or "",
+            lesson.get("time") or "",
+        )
+
+    @classmethod
+    def _normalize_day(cls, day: Optional[dict]) -> Optional[dict]:
+        if day is None:
+            return None
+
+        pairs = day.get("pairs") or {}
+        normalized_pairs = {}
+        for pair_num, lessons in sorted(pairs.items(), key=lambda x: int(x[0])):
+            normalized_pairs[pair_num] = sorted(lessons, key=cls._lesson_sort_key)
+
+        return {
+            "day_week": day.get("day_week"),
+            "pairs": normalized_pairs,
+        }
+
+    @classmethod
+    def _normalize_schedule(cls, schedule: dict) -> dict:
+        return {
+            day: cls._normalize_day(schedule.get(day))
+            for day in sorted(schedule.keys())
+        }
+
     @classmethod
     async def get_schedule(cls, group: int, begin: date, end: date):
         log.debug("Start getting schedule group: %s", group)
@@ -58,11 +93,12 @@ class ScheduleService:
         log.debug("Started update schedule group: %s", group)
         redis = await get_redis()
         today = date.today()
-        begin_date = today - timedelta(weeks=2)
+        begin_date = today - timedelta(weeks=0)
         end_date = today + timedelta(weeks=2)
 
         schedule_old = await redis.get(str(group))
         schedule_new = await Schedule.pars_schedule(group, begin_date, end_date)
+        schedule_new = cls._normalize_schedule(schedule_new)
 
         if schedule_old is None:
             log.info("Schedule group %s not found in redis", group)
@@ -78,6 +114,7 @@ class ScheduleService:
 
         hashes = await redis.hgetall(f"{group}:hash")
         schedule_old = json.loads(schedule_old)
+        schedule_old = cls._normalize_schedule(schedule_old)
 
         log.debug("Started search different")
         for key, value in schedule_new.items():
@@ -92,7 +129,7 @@ class ScheduleService:
             if hash_old != hash_new:
                 hashes[key] = hash_new
                 log.info('Found update schedule in %s', key)
-                ch = FindChanges.find_changes(old_val=schedule_old[key], new_val=value)
+                ch = FindChanges.find_changes(old_val=schedule_old.get(key), new_val=value)
                 all_changes = Changes(
                     count=len(ch),
                     day=key,
