@@ -23,6 +23,7 @@ jobs:
 
       - name: Build and Deploy
         run: | 
+          docker compose -f docker-compose.yaml exec redis redis-cli FLUSHDB ASYNC
           echo "Building and starting containers..."
           # Объединяем в одну команду для надежности
           docker compose up -d --build
