@@ -2,7 +2,7 @@ FROM golang:1.26.1-alpine AS builder
 
 WORKDIR /
 
-COPY . /
+COPY ./yandex_service/ /
 
 RUN CGO_ENABLED=0 GOOS=linux go build cmd/server/main.go
 
