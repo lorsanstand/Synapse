@@ -39,12 +39,18 @@ type scheduleIntents struct {
 }
 
 type slots struct {
-	When whenSlot `json:"when"`
+	When      whenSlot      `json:"when"`
+	DayOfWeek dayOfWeekSlot `json:"day_of_week"`
 }
 
 type whenSlot struct {
 	Type  string         `json:"type"`
 	Value yandexDatetime `json:"value"`
+}
+
+type dayOfWeekSlot struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
 }
 
 type nlu struct {

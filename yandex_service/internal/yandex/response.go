@@ -53,7 +53,7 @@ func scheduleYandexResponse(schedule schedule.Day) YandexResponse {
 		lessons += fmt.Sprintf("%v, ", strings.Trim(pair[0].LessonName, "_"))
 	}
 
-	text = text + FirstPair + lessons
+	text = text + lessons + FirstPair
 
 	if schedule.Pairs == nil {
 		text = "Хорошие новости! пар нет, можно отдыхать."
