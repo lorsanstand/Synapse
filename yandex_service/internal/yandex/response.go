@@ -2,6 +2,7 @@ package yandex
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/lorsanstand/yandex_service/internal/integration/schedule"
 )
@@ -38,7 +39,7 @@ func scheduleYandexResponse(schedule schedule.Day) YandexResponse {
 		//tim := strings.Split(pair[0].Time, " - ")
 		//text += fmt.Sprintf("Первая пара начинается в %v.", tim[0])
 
-		text += fmt.Sprintf("%v, ", pair[0].LessonName)
+		text += fmt.Sprintf("%v, ", strings.Trim(pair[0].LessonName, "_"))
 	}
 
 	if schedule.Pairs == nil {
