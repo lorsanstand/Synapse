@@ -1,13 +1,19 @@
 package yandex
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/lorsanstand/yandex_service/pkg/utils/week"
 )
 
 func (y *Yandex) scheduleAnswer(w http.ResponseWriter, req YandexRequest) {
-	day := y.getDate(req)
+	day, err := y.getDate(req)
+	if err != nil {
+		y.respond.RespondJSON(w, 200, failedYandexResponse())
+	}
 
 	Schedule, err := y.schedule.GetSchedule(90002595, day, day)
 	if err != nil {
@@ -21,21 +27,26 @@ func (y *Yandex) scheduleAnswer(w http.ResponseWriter, req YandexRequest) {
 	y.respond.RespondJSON(w, 200, response)
 }
 
-var weekDay = map[string]int{"воскресенье": 0, "понедельник": 1, "вторник": 2, "среда": 3, "четверг": 4, "пятница": 5, "суббота": 6}
-
-func (y *Yandex) getDate(req YandexRequest) time.Time {
-	now := time.Now()
-	day := now
+func (y *Yandex) getDate(req YandexRequest) (time.Time, error) {
+	day := time.Now()
 
 	ScheduleDay := req.Request.NLU.Intents.Schedule.Slots.When.Value
 	DayOfWeek := req.Request.NLU.Intents.Schedule.Slots.DayOfWeek.Value
 
 	if ScheduleDay.DayIsRelative {
 		day = day.AddDate(0, 0, ScheduleDay.Day)
+
 	} else if DayOfWeek != "" {
-		num := weekDay[DayOfWeek] - int(day.Weekday())
+		NumDay, ok := week.SearchDay(DayOfWeek)
+		if !ok {
+			return time.Time{}, fmt.Errorf("failed search day")
+		}
+
+		num := NumDay - int(day.Weekday())
 		day = day.AddDate(0, 0, num)
+	} else {
+		return time.Time{}, fmt.Errorf("failed search day")
 	}
 
-	return day
+	return day, nil
 }

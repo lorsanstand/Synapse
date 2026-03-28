@@ -37,7 +37,7 @@ func scheduleYandexResponse(schedule schedule.Day) YandexResponse {
 	var text, lessons, FirstPair string
 	NumPairSmall := 10
 
-	text = fmt.Sprintf("На заданный день у вас %v пары, ", len(schedule.Pairs))
+	text = fmt.Sprintf("В %v у вас %v пары, ", schedule.DayWeek, len(schedule.Pairs))
 	for num, pair := range schedule.Pairs {
 		numPair, err := strconv.Atoi(num)
 		if err != nil {
