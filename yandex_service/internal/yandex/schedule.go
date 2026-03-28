@@ -13,6 +13,7 @@ func (y *Yandex) scheduleAnswer(w http.ResponseWriter, req YandexRequest) {
 	day, err := y.getDate(req)
 	if err != nil {
 		y.respond.RespondJSON(w, 200, failedYandexResponse())
+		return
 	}
 
 	Schedule, err := y.schedule.GetSchedule(90002595, day, day)
@@ -43,6 +44,10 @@ func (y *Yandex) getDate(req YandexRequest) (time.Time, error) {
 		}
 
 		num := NumDay - int(day.Weekday())
+		if num < 0 {
+			day = day.AddDate(0, 0, 7)
+		}
+
 		day = day.AddDate(0, 0, num)
 	} else {
 		return time.Time{}, fmt.Errorf("failed search day")

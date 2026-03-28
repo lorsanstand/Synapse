@@ -31,6 +31,7 @@ func (y *Yandex) Response(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		slog.Error("error JSON decode", "error", err)
+		http.Error(w, "Failed json decode", http.StatusBadRequest)
 		return
 	}
 
